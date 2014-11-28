@@ -11,6 +11,8 @@ import functools
 import re
 from copy import copy
 
+from .SideBarAPI import SideBarSelection
+
 IS_ST3 = sublime.version().startswith('3')
 
 
@@ -672,7 +674,12 @@ class UncommittedFilesCommand(VcsCommand, sublime_plugin.WindowCommand):
     def is_enabled(self):
         return bool(self.get_working_dir())
 
-    def get_working_dir(self):
+    def get_working_dir(self, paths = []):
+        if len(paths) > 0:
+            folder = SideBarSelection(paths).getSelectedDirectoriesOrDirnames()[0].path()
+            if folder and get_vcs(folder):
+                return folder
+
         if self._active_file_name():
             working_dir = super(UncommittedFilesCommand, self).get_working_dir()
             if working_dir and get_vcs(working_dir):
@@ -684,8 +691,8 @@ class UncommittedFilesCommand(VcsCommand, sublime_plugin.WindowCommand):
             if folder and os.path.exists(folder) and get_vcs(folder):
                 return folder
 
-    def run(self):
-        self.vcs = get_vcs(self.get_working_dir())
+    def run(self, paths = []):
+        self.vcs = get_vcs(self.get_working_dir(paths))
         status_command = getattr(self, '{0}_status_command'.format(self.vcs['name']), None)
         if status_command:
             self.run_command(status_command(), self.status_done, working_dir=self.vcs['root'])
