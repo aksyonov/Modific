@@ -1,0 +1,5 @@
+[{
+	"caption": "Show uncommitted files",
+	"command": "uncommitted_files",
+	"args": {"paths": []}
+}]
